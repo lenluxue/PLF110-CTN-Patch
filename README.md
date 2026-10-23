@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 下载 [`plf110_ctnd_kmod_v2.1.3.zip`](https://github.com/lenluxue/ctn_patch/releases/download/v2.1.3/plf110_ctnd_kmod_v2.1.3.zip)。
+1. 下载 [`plf110_ctnd_kmod_v2.1.3.zip`](https://github.com/lenluxue/PLF110-CTN-Patch/releases/download/v2.1.3/plf110_ctnd_kmod_v2.1.3.zip)。
 2. 在 KernelSU、Magisk 或 APatch 的模块页面安装该 ZIP，然后重启设备。
 3. 重启后可在模块页面点击 **Action** 查看当前是否生效。
 
