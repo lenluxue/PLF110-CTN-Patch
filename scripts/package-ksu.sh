@@ -2,7 +2,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-OUT=${1:-$ROOT/dist/plf110_ctnd_kmod_v2.1.1.zip}
+OUT=${1:-$ROOT/dist/plf110_ctnd_kmod_v2.1.2.zip}
 STAGE=$(mktemp -d "${TMPDIR:-/tmp}/plf110-ctn.XXXXXX")
 trap 'rm -rf "$STAGE"' EXIT HUP INT TERM
 

@@ -8,7 +8,7 @@
 - Kernel: `6.1.157-android14-11-o-gc2dad16af736`
 - ABI: arm64-v8a
 
-## v2.1.1 checks
+## v2.1.2 checks
 
 - KO vermagic matches the running kernel.
 - `ctb_name_patch` loads and creates `critical_task_name`.
@@ -18,3 +18,4 @@
 - KernelSU boot started the daemon after reapplying execute permission.
 - Game test: `com.tencent.mf.uam`, config `GameThread RHIThread`, `ctb=1`.
 - Observed result: node switched to `GameThread RHIThread`, `ct_enable=1`, `RHIThread` registered in `rt_info`.
+- Database copy cleanup test leaves zero `plf110_ctnd_db_*` directories after a successful or unmatched lookup.

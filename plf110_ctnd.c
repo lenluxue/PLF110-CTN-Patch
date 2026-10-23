@@ -131,6 +131,8 @@ static const char *find_db(void)
 	return NULL;
 }
 
+static void cleanup_database(const char *dbpath);
+
 static bool copy_database(const char *src, char *dst, size_t cap)
 {
 	char dir[] = "/data/local/tmp/plf110_ctnd_db_XXXXXX";
@@ -141,9 +143,23 @@ static bool copy_database(const char *src, char *dst, size_t cap)
 	snprintf(dst, cap, "%s/db", dir);
 	in = open(src, O_RDONLY | O_CLOEXEC);
 	out = open(dst, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
-	if (in < 0 || out < 0) { if (in >= 0) close(in); if (out >= 0) close(out); return false; }
+	if (in < 0 || out < 0) {
+		if (in >= 0) close(in);
+		if (out >= 0) close(out);
+		cleanup_database(dst);
+		return false;
+	}
 	while ((got = read(in, buf, sizeof(buf))) > 0) {
-		if (write(out, buf, got) != got) { close(in); close(out); return false; }
+		if (write(out, buf, got) != got) {
+			close(in); close(out);
+			cleanup_database(dst);
+			return false;
+		}
+	}
+	if (got < 0) {
+		close(in); close(out);
+		cleanup_database(dst);
+		return false;
 	}
 	close(in); close(out);
 	snprintf(wal_src, sizeof(wal_src), "%s-wal", src);
@@ -167,6 +183,8 @@ static void cleanup_database(const char *dbpath)
 	if (!dbpath) return;
 	unlink(dbpath);
 	{ char p[512]; snprintf(p, sizeof(p), "%s-wal", dbpath); unlink(p); }
+	{ char p[512]; snprintf(p, sizeof(p), "%s-shm", dbpath); unlink(p); }
+	{ char p[512]; snprintf(p, sizeof(p), "%s-journal", dbpath); unlink(p); }
 	snprintf(dir, sizeof(dir), "%s", dbpath);
 	slash = strrchr(dir, '/');
 	if (slash) { *slash = 0; rmdir(dir); }
