@@ -2,7 +2,7 @@
 
 为 OnePlus PLF110 / Ace 5 Race 补回可配置的 `/proc/game_opt/task_boost/critical_task_name`，并由 daemon 根据 COSA 云控配置自动选择游戏关键线程。
 
-本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.2 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
+本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.3 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
 
 > 当前验证环境：`6.1.157-android14-11-o-gc2dad16af736`，KernelSU，arm64-v8a。
 > 内核模块与机型、内核版本强绑定，不能跨内核直接复用。
@@ -28,11 +28,11 @@ Call trace:
   init_module
 ```
 
-随后 MTK mrdump 导致整机卡死。v2.1.2 已彻底删除这条路径，改为在 `get_critical_task_state()` 入口使用 kprobe 覆盖结果，不修改页权限、厂商 `.rodata` 或 `critical_task` 指针。完整分析见 [docs/ROOT_CAUSE.md](docs/ROOT_CAUSE.md)。
+随后 MTK mrdump 导致整机卡死。v2.1.3 已彻底删除这条路径，改为在 `get_critical_task_state()` 入口使用 kprobe 覆盖结果，不修改页权限、厂商 `.rodata` 或 `critical_task` 指针。完整分析见 [docs/ROOT_CAUSE.md](docs/ROOT_CAUSE.md)。
 
 ## 安装
 
-1. 在 KernelSU 管理器中安装 [`dist/plf110_ctnd_kmod_v2.1.2.zip`](dist/plf110_ctnd_kmod_v2.1.2.zip)。
+1. 在 KernelSU 管理器中安装 [`dist/plf110_ctnd_kmod_v2.1.3.zip`](dist/plf110_ctnd_kmod_v2.1.3.zip)。
 2. 重启设备。
 3. 可选：在 KernelSU 模块页点击 Action 重启 daemon。
 
@@ -51,6 +51,16 @@ cat /data/adb/modules/plf110_ctnd/plf110_ctnd.log
 ctb_name_patch 24576 0 - Live ... (OE)
 UnityMain UnityGfxDevice
 ... /data/adb/modules/plf110_ctnd/plf110_ctnd -d ... -r 15
+```
+
+点击 KernelSU 模块页的 **Action** 会执行只读诊断，不会重启服务。输出包含当前游戏、目标 `ctn`、匹配 TID、节点值、`ct_enable` 和最终结论：
+
+```text
+ko=loaded
+daemon=running pid=<pid>
+result=EFFECTIVE
+message=关键线程配置已生效
+overall=已生效
 ```
 
 启动带 `ctn` 配置的游戏后，日志应出现类似：

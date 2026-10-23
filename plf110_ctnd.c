@@ -18,6 +18,7 @@
 
 #define GAME_PID "/proc/game_opt/game_pid"
 #define RT_INFO "/proc/game_opt/rt_info"
+#define RT_NUM "/proc/game_opt/rt_num"
 #define NODE "/proc/game_opt/task_boost/critical_task_name"
 #define ES4G_CRITICAL "/proc/game_opt/es4g/critical_task"
 #define CT_ENABLE "/proc/game_opt/task_boost/ct_enable"
@@ -282,6 +283,83 @@ static int collect_tids(int pid, const char *want1, const char *want2, pid_t *ou
 	closedir(dir); return n;
 }
 
+static int check_status(void)
+{
+	char game[128] = "", pkg[256] = "", names[2 * MAX_NAME] = "";
+	char node[512] = "", rt_num_raw[128] = "", enable_raw[64] = "";
+	char copy[2 * MAX_NAME], *a, *b, *save;
+	pid_t tids[MAX_TIDS];
+	const char *database = find_db();
+	const char *result, *message;
+	int pid = -1, ctb = -1, matched = 0, rt_num = -1, enable = -1;
+	bool db_ok = false, node_ready = false;
+
+	if (read_file(GAME_PID, game, sizeof(game)))
+		pid = parse_pid(game);
+	if (pid > 0 && process_package(pid, pkg, sizeof(pkg))) {
+		db_ok = lookup_names(pkg, names, sizeof(names), &ctb);
+		if (names[0]) {
+			snprintf(copy, sizeof(copy), "%s", names);
+			a = strtok_r(copy, " \t\r\n", &save);
+			b = strtok_r(NULL, " \t\r\n", &save);
+			if (!b) b = a;
+			if (a) matched = collect_tids(pid, a, b, tids, MAX_TIDS);
+		}
+	}
+
+	if (read_file(NODE, node, sizeof(node)))
+		node[strcspn(node, "\n")] = 0;
+	node_ready = access(NODE, F_OK) == 0;
+	if (read_file(RT_NUM, rt_num_raw, sizeof(rt_num_raw))) {
+		char *p = strstr(rt_num_raw, "rt_num=");
+		if (p) rt_num = atoi(p + 7);
+	}
+	if (read_file(CT_ENABLE, enable_raw, sizeof(enable_raw)))
+		enable = atoi(enable_raw);
+
+	result = "NOT_EFFECTIVE";
+	message = "关键线程配置未生效";
+	if (pid <= 0) {
+		result = "READY_IDLE";
+		message = "模块已就绪，当前没有游戏";
+	} else if (!pkg[0]) {
+		result = "NOT_EFFECTIVE";
+		message = "无法读取当前游戏包名";
+	} else if (!db_ok) {
+		result = "DB_ERROR";
+		message = "COSA 数据库读取失败";
+	} else if (!names[0]) {
+		result = "NOT_CONFIGURED";
+		message = "当前游戏没有 ctn 配置";
+	} else if (matched <= 0) {
+		result = "WAITING_THREADS";
+		message = "配置存在，但还没找到匹配线程";
+	} else if (!node_ready || strcmp(node, names)) {
+		result = "NOT_EFFECTIVE";
+		message = "匹配线程存在，但节点尚未切换到目标名称";
+	} else if (ctb > 0 && enable != 1) {
+		result = "NOT_EFFECTIVE";
+		message = "名称已写入，但 ct_enable 未开启";
+	} else {
+		result = "EFFECTIVE";
+		message = "关键线程配置已生效";
+	}
+
+	printf("game_pid=%d\n", pid);
+	printf("package=%s\n", pkg);
+	printf("db=%s\n", database ? database : "missing");
+	printf("config_ctn=%s\n", names);
+	printf("config_ctb=%d\n", ctb);
+	printf("matched_tids=%d\n", matched);
+	printf("node_ready=%s\n", node_ready ? "yes" : "no");
+	printf("node=%s\n", node);
+	printf("rt_num=%d\n", rt_num);
+	printf("ct_enable=%d\n", enable);
+	printf("result=%s\n", result);
+	printf("message=%s\n", message);
+	return 0;
+}
+
 static pid_t es4g_tids[MAX_TIDS];
 static int es4g_tid_count;
 
@@ -410,7 +488,8 @@ int main(int argc, char **argv)
 		else if (!strcmp(argv[i], "-r") && i + 1 < argc) interval_s = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p") && i + 1 < argc) pid_override = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-e")) manage_enable = true;
-		else if (!strcmp(argv[i], "-h")) { printf("plf110_ctnd [-d db] [-r seconds] [-p pid] [-e]\n"); return 0; }
+		else if (!strcmp(argv[i], "--check")) return check_status();
+		else if (!strcmp(argv[i], "-h")) { printf("plf110_ctnd [-d db] [-r seconds] [-p pid] [-e] [--check]\n"); return 0; }
 	}
 	if (interval_s < 5) interval_s = 5;
 	signal(SIGTERM, on_signal); signal(SIGINT, on_signal); signal(SIGHUP, SIG_IGN);

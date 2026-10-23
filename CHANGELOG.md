@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.3 - 2026-10-24
+
+- KernelSU Action 改为只读生效诊断，不再自动重启 daemon。
+- 显示当前游戏、`ctn`、匹配 TID、节点值、`rt_num`、`ct_enable` 和最终结论。
+- 新增 `plf110_ctnd --check` 调试接口。
+
 ## v2.1.2 - 2026-10-24
 
 - 修复 COSA 数据库临时目录泄漏：清理 SQLite 生成的 `-shm` 和 `-journal` 文件。
