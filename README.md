@@ -2,7 +2,7 @@
 
 为 OnePlus PLF110 / Ace 5 Race 补回可配置的 `/proc/game_opt/task_boost/critical_task_name`，并由 daemon 根据 COSA 云控配置自动选择游戏关键线程。
 
-本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.4 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
+本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.5 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
 
 鸣谢：`toolfor`、[`Turbowfz`](https://github.com/Turbowfz)。
 
@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 下载 [`plf110_ctnd_kmod_v2.1.4.zip`](https://github.com/lenluxue/PLF110-CTN-Patch/releases/download/v2.1.4/plf110_ctnd_kmod_v2.1.4.zip)。
+1. 下载 [`plf110_ctnd_kmod_v2.1.5.zip`](https://github.com/lenluxue/PLF110-CTN-Patch/releases/download/v2.1.5/plf110_ctnd_kmod_v2.1.5.zip)。
 2. 在 KernelSU、Magisk 或 APatch 的模块页面安装该 ZIP，然后重启设备。
 3. 重启后可在模块页面点击 **Action** 查看当前是否生效。
 

@@ -8,7 +8,7 @@
 - Kernel: `6.1.157-android14-11-o-gc2dad16af736`
 - ABI: arm64-v8a
 
-## v2.1.4 checks
+## v2.1.5 checks
 
 - KO vermagic matches the running kernel.
 - `ctb_name_patch` loads and creates `critical_task_name`.
@@ -21,3 +21,4 @@
 - Database copy cleanup test leaves zero `plf110_ctnd_db_*` directories after a successful or unmatched lookup.
 - Action check run with no game returns `result=READY_IDLE` and reports KO/daemon state without restarting services.
 - Single-name COSA config `ctn:"sleep"` is normalized to `sleep sleep` before writing `critical_task_name`, and the matching TID appears in `rt_info`.
+- KernelSU package contains no `.c` source files.

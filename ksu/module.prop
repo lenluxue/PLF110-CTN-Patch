@@ -1,6 +1,6 @@
 id=plf110_ctnd
 name=PLF110 CTN Patch + Daemon
-version=2.1.4
-versionCode=7
+version=2.1.5
+versionCode=8
 author=local-build
 description=Kprobe-based ctb_name_patch.ko with no vendor rodata writes, plus the PLF110 CTN daemon.
