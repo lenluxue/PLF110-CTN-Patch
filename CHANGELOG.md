@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.4 - 2026-10-24
+
+- 修复 COSA `ctn` 只有一个名称时的兼容性：自动复制为两个槽位后再写节点。
+- 修复单名称配置反复收到 `EINVAL` 且无法生效的问题。
+- 已验证 `ctn:"sleep"` 会写入 `sleep sleep` 并登记匹配 TID。
+
 ## v2.1.3 - 2026-10-24
 
 - KernelSU Action 改为只读生效诊断，不再自动重启 daemon。

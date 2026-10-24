@@ -2,7 +2,7 @@
 
 为 OnePlus PLF110 / Ace 5 Race 补回可配置的 `/proc/game_opt/task_boost/critical_task_name`，并由 daemon 根据 COSA 云控配置自动选择游戏关键线程。
 
-本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.3 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
+本项目是面向 **PLF110 / OP60F9L1 / Android 16 / MT6989** 的独立实现。目标与 [`Turbowfz/ctn_patch`](https://github.com/Turbowfz/ctn_patch) 相同，但内核适配和 v2.1.4 的 kprobe 实现是独立完成的，不依赖旧设备二进制。
 
 鸣谢：`toolfor`、[`Turbowfz`](https://github.com/Turbowfz)。
 
@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 下载 [`plf110_ctnd_kmod_v2.1.3.zip`](https://github.com/lenluxue/PLF110-CTN-Patch/releases/download/v2.1.3/plf110_ctnd_kmod_v2.1.3.zip)。
+1. 下载 [`plf110_ctnd_kmod_v2.1.4.zip`](https://github.com/lenluxue/PLF110-CTN-Patch/releases/download/v2.1.4/plf110_ctnd_kmod_v2.1.4.zip)。
 2. 在 KernelSU、Magisk 或 APatch 的模块页面安装该 ZIP，然后重启设备。
 3. 重启后可在模块页面点击 **Action** 查看当前是否生效。
 
@@ -82,6 +82,8 @@ WHERE package_name = ?;
 ```json
 {"ctb":1,"htb":1,"ctep":90,"ctn":"Thread- RenderThread"}
 ```
+
+`ctn` 只有一个名称时，daemon 会自动复制成两个槽位，例如 `Thread-` 会写为 `Thread- Thread-`。
 
 数据库使用临时副本读取，避免直接打开正在写入的 COSA WAL 数据库。读取完成后会清理 `-wal`、`-shm`、`-journal` 和临时目录。
 

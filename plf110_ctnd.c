@@ -223,10 +223,23 @@ static bool json_int(const char *json, const char *key, int *value)
 	*value = (int)strtol(p + 1, &end, 10); return end != p + 1;
 }
 
+static bool normalize_names(const char *raw, char *out, size_t cap)
+{
+	char copy[2 * MAX_NAME], *a, *b, *save;
+	snprintf(copy, sizeof(copy), "%s", raw);
+	a = strtok_r(copy, " \t\r\n", &save);
+	if (!a) return false;
+	b = strtok_r(NULL, " \t\r\n", &save);
+	if (!b) b = a;
+	if (strlen(a) >= MAX_NAME || strlen(b) >= MAX_NAME) return false;
+	snprintf(out, cap, "%s %s", a, b);
+	return true;
+}
+
 static bool lookup_names(const char *pkg, char *names, size_t cap, int *ctb)
 {
 	const char *source = find_db();
-	char dbpath[512], cfg[MAX_CFG];
+	char dbpath[512], cfg[MAX_CFG], ctn[2 * MAX_NAME];
 	sqlite3 *db = NULL; sqlite3_stmt *st = NULL; const unsigned char *txt;
 	int rc; bool ok = false;
 	*ctb = -1; names[0] = 0;
@@ -241,7 +254,11 @@ static bool lookup_names(const char *pkg, char *names, size_t cap, int *ctb)
 	txt = sql_col(st, 0);
 	if (!txt || !*txt) { ok = true; goto out; }
 	snprintf(cfg, sizeof(cfg), "%s", txt);
-	if (json_value(cfg, "ctn", names, cap)) { (void)json_int(cfg, "ctb", ctb); ok = true; }
+	if (json_value(cfg, "ctn", ctn, sizeof(ctn))) {
+		(void)json_int(cfg, "ctb", ctb);
+		if (normalize_names(ctn, names, cap)) ok = true;
+		else { names[0] = 0; ok = true; }
+	}
 	else { ok = true; names[0] = 0; }
 out:
 	if (st) sql_finalize(st); if (db) sql_close(db); cleanup_database(dbpath); return ok;
